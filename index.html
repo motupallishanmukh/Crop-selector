@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Agriculture System</title>
+    <style>
+        *{
+            font-family:Arial, Helvetica, sans-serif;
+            box-sizing: border-box;
+            margin:0;
+            padding:0;
+        }
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            width:100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        header h1{
+            padding-bottom:10px;
+        }
+        .container {
+            position: relative;
+            display:flex;
+            flex-direction: column;
+            gap:5px;
+            width:100%;
+            padding: 20px;
+            justify-content: center;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #4CAF50;
+            padding:3px 0px;
+        }
+        input[type="number"] {
+            padding: 8px;
+            width: 100%;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            accent-color: #45a049 ;
+        }
+        input[type="number"]:focus{
+            outline-color:#45a049;
+            outline-offset: 2px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin:10px 0px;
+        }
+        button:hover {
+            background-color: #45a049;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .crop-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            width:100%;
+            height:400px;
+            margin-top:25px;
+            border-radius: 8px;
+            display:flex;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .crop-card-content {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .crop-card img {
+            width: 100%;
+            height: 170px;
+            border-radius: 8px;
+        }
+        .crop-card-details {
+            width:100%;
+            height:230px;
+            padding:20px;
+        }
+        .crop-card-details p{
+            font-size: 16px;
+            margin:10px;
+        } 
+        .crop-card-details .card-heading{
+            font-size:18px;
+            color:#45a049;
+            margin:0;
+            padding:0;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Crop Selector</h1>
+    <p>Enter the temperature and humidity to find suitable crops</p>
+</header>
+
+<div class="container">
+    <h2>Enter Field Conditions</h2>
+    <div class="form-group">
+        <label for="temperature">Temperature (°C):</label><br>
+        <input type="number" id="temperature" placeholder="Enter temperature in °C" autofocus required>
+    </div>
+    <div class="form-group">
+        <label for="humidity">Humidity (%):</label><br>
+        <input type="number" id="humidity" placeholder="Enter humidity in %" required>
+    </div>
+    <button onclick="findCrops()">Find Suitable Crops</button>
+
+    <div id="cropResults"></div>
+</div>
+
+<script>
+    const crops = [
+        { name: 'Wheat', temperatureRange: [3, 35], humidityRange: [50, 70], soilType: 'Loamy, Sandy loam, Silty loam', npkValues: '3-4-4', ph: '6.0–7.0', image: 'https://images.pexels.com/photos/8507103/pexels-photo-8507103.png' },
+        { name: 'Corn (Maize)', temperatureRange: [10, 30], humidityRange: [40, 70], soilType: 'Loamy, Sandy clay loam, Silty loam', npkValues: '10-10-10', ph: '5.8–6.5', image: 'https://images.pexels.com/photos/603030/pexels-photo-603030.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Rice', temperatureRange: [18, 40], humidityRange: [70, 100], soilType: 'Clay loam, Silty clay, Loamy clay', npkValues: '15-15-15', ph: '5.5–7.0', image: 'https://images.pexels.com/photos/1509607/pexels-photo-1509607.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Cotton', temperatureRange: [20, 40], humidityRange: [40, 60], soilType: 'Sandy loam, Loamy, Clay loam', npkValues: '4-2-4', ph: '6.0–8.0', image: 'https://images.pexels.com/photos/4273426/pexels-photo-4273426.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Potato', temperatureRange: [15, 25], humidityRange: [60, 80], soilType: 'Loamy sand, Sandy loam, Silt loam', npkValues: '10-20-20', ph: '5.5–6.5', image: 'https://images.pexels.com/photos/11037935/pexels-photo-11037935.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Sugarcane', temperatureRange: [20, 35], humidityRange: [70, 90], soilType: 'Loamy, Sandy loam, Clay loam', npkValues: '5-5-5', ph: '6.0–7.5', image: 'https://media.istockphoto.com/id/157608572/photo/sugar-cane-sticks-isolated-on-white-backdrop.webp?b=1&s=170667a&w=0&k=20&c=eH0XV6XZdl7iQMfT5Lwj3qSNvOdFrNcl9sFeHX4cLco=' },
+        { name: 'Onion', temperatureRange: [13, 24], humidityRange: [60, 80], soilType: 'Sandy loam, Loamy, Silty loam', npkValues: '10-20-20', ph: '6.0–7.0', image: 'https://media.istockphoto.com/id/503324916/photo/onions.webp?b=1&s=170667a&w=0&k=20&c=1qUcf0CE7nJh96A4wqy0TihtjUsmwA9R30vNbVRgFUY=' },
+        { name: 'Carrot', temperatureRange: [10, 25], humidityRange: [55, 75], soilType: 'Sandy loam, Loamy sand, Loamy', npkValues: '5-10-10', ph: '6.0–6.8', image: 'https://images.pexels.com/photos/1306559/pexels-photo-1306559.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Soybean', temperatureRange: [10, 30], humidityRange: [50, 80], soilType: 'Loamy, Sandy loam, Silty loam', npkValues: '0-20-20', ph: '6.0–7.0', image: 'https://plus.unsplash.com/premium_photo-1661815691473-5efc09a055e4?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+        { name: 'Sunflower', temperatureRange: [18, 30], humidityRange: [50, 70], soilType: 'Loamy, Sandy clay loam, Silty loam', npkValues: '20-10-10', ph: '6.0–7.5', image: 'https://images.pexels.com/photos/1169084/pexels-photo-1169084.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Chili Pepper', temperatureRange: [18, 35], humidityRange: [60, 80], soilType: 'Loamy, Sandy loam, Silty loam', npkValues: '5-10-10', ph: '6.0–6.5', image: 'https://images.unsplash.com/photo-1526346698789-22fd84314424?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+        { name: 'Ginger', temperatureRange: [20, 30], humidityRange: [70, 90], soilType: 'Loamy, Sandy loam, Silty clay loam', npkValues: '10-10-10', ph: '5.5–6.5', image: 'https://media.istockphoto.com/photos/ginger-root-slice-with-leaf-and-has-a-spicy-taste-picture-id614138310?b=1&k=20&m=614138310&s=170667a&w=0&h=9W2QNduRVJblp44AaG_mF0PrwQSjIxmSGQ6MYSkkSeA=' },
+        { name: 'Tea', temperatureRange: [18, 30], humidityRange: [70, 90], soilType: 'Acidic loam, Sandy loam, Clay loam', npkValues: '4-5-7', ph: '4.5–5.5', image: 'https://images.unsplash.com/photo-1546342278-5cceccde4a65?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80' },
+        { name: 'Coffee', temperatureRange: [18, 24], humidityRange: [60, 90], soilType: 'Loamy, Sandy loam, Silty loam', npkValues: '10-10-10', ph: '5.0–6.0', image: 'https://plus.unsplash.com/premium_photo-1673637380658-4144fd3fa160?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+        { name: 'Peas', temperatureRange: [7, 24], humidityRange: [50, 80], soilType: 'Loamy, Sandy loam, Silty loam', npkValues: '5-10-10', ph: '6.0–7.5', image: 'https://images.pexels.com/photos/768090/pexels-photo-768090.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Lettuce', temperatureRange: [10, 25], humidityRange: [60, 80], soilType: 'Loamy, Silty loam, Sandy loam', npkValues: '5-10-10', ph: '6.0–7.0', image: 'https://images.pexels.com/photos/348689/pexels-photo-348689.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' },
+        { name: 'Spinach', temperatureRange: [10, 25], humidityRange: [60, 80], soilType: 'Loamy, Sandy loam, Silty loam', npkValues: '10-10-10', ph: '6.0–7.5', image: 'https://images.unsplash.com/photo-1515356956468-873dd257f911?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+        { name: 'Basil', temperatureRange: [20, 30], humidityRange: [40, 70], soilType: 'Loamy, Silty loam, Sandy loam', npkValues: '5-10-10', ph: '6.0–7.5', image: 'https://plus.unsplash.com/premium_photo-1725899523683-838307ab1552?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+        { name: 'Cucumber', temperatureRange: [18, 35], humidityRange: [60, 80], soilType: 'Sandy loam, Loamy, Silty loam', npkValues: '5-5-5', ph: '5.5–6.8', image: 'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }
+    ];
+
+    function findCrops() {
+    const temperature = parseFloat(document.getElementById('temperature').value);
+    const humidity = parseFloat(document.getElementById('humidity').value);
+    const resultsContainer = document.getElementById('cropResults');
+    resultsContainer.innerHTML = ''; // Clear previous results
+
+    if (isNaN(temperature) || isNaN(humidity)) {
+        resultsContainer.innerHTML = "<p>Please enter valid temperature and humidity values.</p>";
+        return;
+    }
+
+    // Filter matching crops
+    const matchingCrops = crops.filter(crop => 
+        temperature >= crop.temperatureRange[0] && temperature <= crop.temperatureRange[1] &&
+        humidity >= crop.humidityRange[0] && humidity <= crop.humidityRange[1]
+    );
+
+    if (matchingCrops.length === 0) {
+        resultsContainer.innerHTML = "<p>No crops found for the given conditions.</p>";
+    } else {
+        matchingCrops.forEach(crop => {
+            const cropCard = document.createElement('div');
+            cropCard.classList.add('crop-card');
+
+            cropCard.innerHTML = `
+                <div class="crop-card-content">
+                    <img src="${crop.image}" alt="${crop.name}">
+                    <div class="crop-card-details">
+                        <p class="card-heading"><strong>${crop.name}</strong></p>
+                        <p><strong>Temperature Range:</strong> ${crop.temperatureRange[0]}°C - ${crop.temperatureRange[1]}°C</p>
+                        <p><strong>Humidity Range:</strong> ${crop.humidityRange[0]}% - ${crop.humidityRange[1]}%</p>
+                        <p><strong>Soil Type:</strong> ${crop.soilType}</p>
+                        <p><strong>NPK Values:</strong> ${crop.npkValues}</p>
+                        <p><strong>pH Level:</strong> ${crop.ph}</p>
+                    </div>
+                </div>
+                `;
+                resultsContainer.appendChild(cropCard);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
